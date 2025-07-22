@@ -64,6 +64,27 @@ router.put("/:id", authMiddleware, async (req, res) => {
   }
 });
 
+// Search Notes Route - GET /api/posts/search?q=searchTerm
+router.get("/search", authMiddleware, async (req, res) => {
+  const userId = req.user.id;
+  const query = req.query.q;
+
+  try {
+    const notes = await Post.find({
+      user: userId,
+      $or: [
+        { title: { $regex: query, $options: "i" } },
+        { content: { $regex: query, $options: "i" } },
+      ],
+    }).sort({ createdAt: -1 });
+
+    res.json(notes);
+  } catch (err) {
+    console.error("Search error:", err.message);
+    res.status(500).json({ message: "Server error during search" });
+  }
+});
+
 
 module.exports = router;
 
