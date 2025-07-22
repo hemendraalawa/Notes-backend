@@ -49,4 +49,21 @@ router.delete("/:id", authMiddleware, async (req, res) => {
   }
 });
 
+// ✅ Update post (only by its owner)
+router.put("/:id", authMiddleware, async (req, res) => {
+  try {
+    const note = await Post.findOneAndUpdate(
+      { _id: req.params.id, user: req.user.id },
+      { $set: req.body },
+      { new: true }
+    );
+    if (!note) return res.status(404).json({ message: "Note not found" });
+    res.json(note);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
 module.exports = router;
+
